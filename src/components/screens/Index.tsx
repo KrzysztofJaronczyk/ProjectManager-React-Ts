@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, query, addDoc } from 'firebase/firestore';
+import { collection, getDocs, query, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useFirestore } from '~/lib/firebase';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { PencilSquareIcon } from '@heroicons/react/24/outline';
 import ProjectCard from '../shared/ProjectCard';
 
 export type Project = {
@@ -15,7 +14,7 @@ export type Project = {
   created: Date | null; // Change created type to Date | null
 };
 
-enum InputEnum {
+export enum InputEnum {
   Id = 'id',
   Title = 'title',
   Description = 'desc',
@@ -53,6 +52,47 @@ function Index() {
     fetchData();
   }, []);
 
+  const onDeleteProject = async (id: string) => {
+    try {
+      const docRef = doc(firestore, 'project', id);
+      await deleteDoc(docRef);
+      setProjects(projects.filter(project => project.id !== id));
+      toast.success('🗑️ Project has been deleted!', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Bounce,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onUpdateProject = (id: string, data: Partial<Project>) => {
+    const docRef = doc(firestore, 'project', id);
+    updateDoc(docRef, data).then(() => {
+      toast.success('🦄 Project has been updated!', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Bounce,
+      });
+    })
+    .catch(error => {
+      console.log(error);
+    });
+  };
+
   const handleInputChange = (field: InputEnum, value: string | Date | null) => {
     setInputData({
       ...inputData,
@@ -69,7 +109,8 @@ function Index() {
         desc: inputData.desc,
         created: inputData.created as Date,
       };
-      await addDoc(projectsCollection, newProject);
+
+      const docRef = await addDoc(projectsCollection, newProject);
       toast.success('🦄 Project has been added!', {
         position: 'top-right',
         autoClose: 5000,
@@ -81,7 +122,7 @@ function Index() {
         theme: 'dark',
         transition: Bounce,
       });
-      setProjects([...projects, newProject as Project]);
+      setProjects([...projects, { id: docRef.id, ...newProject } as Project]);
       setInputData({ title: '', desc: '', created: new Date() });
     } catch (error) {
       setFormError(true);
@@ -121,8 +162,8 @@ function Index() {
             </button>
           </form>
           <div className="grid grid-cols-3 gap-4 w-full text-slate-50">
-            {projects.map(project => (
-              <ProjectCard key={project.id} project={project} />
+            {projects.map((project) => (
+              <ProjectCard key={project.id} project={project} onUpdate={onUpdateProject} onDelete={onDeleteProject} />
             ))}
           </div>
         </div>
