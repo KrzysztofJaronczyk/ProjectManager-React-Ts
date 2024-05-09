@@ -5,6 +5,8 @@ import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { PencilSquareIcon } from '@heroicons/react/24/outline';
+import ProjectCard from '../shared/ProjectCard';
 
 export type Project = {
   id: string;
@@ -119,19 +121,8 @@ function Index() {
             </button>
           </form>
           <div className="grid grid-cols-3 gap-4 w-full text-slate-50">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                className="h-40 rounded-md flex flex-col justify-between shadow-slate-900 shadow-md p-4 bg-gradient-to-r from-slate-800 to-slate-700"
-              >
-                <div>
-                  <div className="text-xl mb-2 font-bold">Project: {project.title}</div>
-                  <div className="font-xl">{project.desc}</div>
-                </div>
-                <div className="text-slate-200 text-right text-md text-opacity-60 font-semibold">                  
-                  {project.created ? project.created.toDateString() : 'No date'}
-                </div>
-              </div>
+            {projects.map(project => (
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
         </div>
