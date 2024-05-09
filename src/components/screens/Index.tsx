@@ -1,5 +1,6 @@
+import React from 'react';
 import { Dialog } from '@headlessui/react';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, getDocs, query, addDoc } from 'firebase/firestore';
 import { useEffect, useRef, useState } from 'react';
 import { useAuthState } from '~/components/contexts/UserContext';
 import { SignInButton } from '~/components/domain/auth/SignInButton';
@@ -7,18 +8,24 @@ import { SignOutButton } from '~/components/domain/auth/SignOutButton';
 import { Head } from '~/components/shared/Head';
 import { useFirestore, useStorage } from '~/lib/firebase';
 
-export type Tool = {
+export type Project = {
   id: string;
   title: string;
   desc: string;
 };
 
+enum InputEnum {
+  Id = 'id',
+  Title = 'title',
+  Description = 'desc',
+}
+
 function Index() {
   const { state } = useAuthState();
-  const [projects, setprojects] = useState<Array<Tool>>([]);
+  const [projects, setprojects] = useState<Array<Project>>([]);
   const firestore = useFirestore();
   const storage = useStorage();
-  const [inputData, setInputData] = useState<Partial<Tool>>({
+  const [inputData, setInputData] = useState<Partial<Project>>({
     title: '',
     desc: '',
   });
@@ -30,9 +37,9 @@ function Index() {
       const projectsCollection = collection(firestore, 'project');
       const projectsQuery = query(projectsCollection);
       const querySnapshot = await getDocs(projectsQuery);
-      const fetchedData: Array<Tool> = [];
+      const fetchedData: Array<Project> = [];
       querySnapshot.forEach((doc) => {
-        fetchedData.push({ id: doc.id, ...doc.data() } as Tool);
+        fetchedData.push({ id: doc.id, ...doc.data() } as Project);
       });
       // console.log(fetchedData);
 
@@ -41,20 +48,52 @@ function Index() {
     fetchData();
   }, []);
 
+  const handleInputChange = (field: InputEnum, value: string) => {
+    setInputData({
+      ...inputData,
+      [field]: value,
+    });
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    //don't reload the page
+    e.preventDefault();
+    //>>project crud operations<<
+    //ADD new project
+    try{
+     const projectsCollection = collection(firestore, 'project');
+      const newProject: Partial<Project> = {
+        title: inputData.title,
+        desc: inputData.desc,
+      };
+      // console.log(newProject);
+      await addDoc(projectsCollection, newProject);
+      //update the state
+      setprojects([...projects, newProject as Project]);
+      setInputData({ title: '', desc: '' });
+    } catch (error) {
+     setFormError(true);
+    }
+  };
+
   return (
     <>
       <Head title="TOP PAGE" />
       <div className="hero min-h-screen bg-slate-800">
         <div className="max-w-5xl mx-auto">
-          <form className="flex items-center">
+          <form className="flex items-center" onSubmit={handleFormSubmit}>
             <input
               type="text"
+              onChange={(e) => handleInputChange(InputEnum.Title, e.target.value)}
+              value={inputData.title}
               placeholder="title"
               className="m-4 text-slate-50 bg-transparent border border-slate-700 focus:ring-slate-400 focus:outline-none p-4 rounded-lg"
             />
             <input
               type="text"
-              placeholder="description"
+              onChange={(e) => handleInputChange(InputEnum.Description, e.target.value)}
+              value={inputData.desc}
+              placeholder='description'
               className="m-4 text-slate-50 bg-transparent border border-slate-700 focus:ring-slate-400 focus:outline-none p-4 rounded-lg"
             />
             <button
