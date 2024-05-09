@@ -7,6 +7,8 @@ import { SignInButton } from '~/components/domain/auth/SignInButton';
 import { SignOutButton } from '~/components/domain/auth/SignOutButton';
 import { Head } from '~/components/shared/Head';
 import { useFirestore, useStorage } from '~/lib/firebase';
+import { Bounce, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export type Project = {
   id: string;
@@ -21,7 +23,7 @@ enum InputEnum {
 }
 
 function Index() {
-  const { state } = useAuthState();
+  // const { state } = useAuthState();
   const [projects, setprojects] = useState<Array<Project>>([]);
   const firestore = useFirestore();
   const storage = useStorage();
@@ -68,6 +70,17 @@ function Index() {
       };
       // console.log(newProject);
       await addDoc(projectsCollection, newProject);
+      toast.success('🦄 Project has been added!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+        });
       //update the state
       setprojects([...projects, newProject as Project]);
       setInputData({ title: '', desc: '' });
@@ -121,6 +134,7 @@ function Index() {
           </table>
         </div>
       </div>
+      <ToastContainer />
     </>
   );
 }
