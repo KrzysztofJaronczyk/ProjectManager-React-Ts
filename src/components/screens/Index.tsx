@@ -44,18 +44,42 @@ function Index() {
   return (
     <>
       <Head title="TOP PAGE" />
-      <div className="hero min-h-screen">
-        {/* display projects */}
-        <div className="container mx-auto">
-          <h1 className="text-3xl font-bold text-center">Projects</h1>
-          <div className="grid grid-cols-3 gap-4">
-            {projects.map((project) => (
-              <div key={project.id} className="bg-white p-4 shadow-md rounded-md">
-                <h2 className="text-lg font-bold">{project.title}</h2>
-                <p>{project.desc}</p>
-              </div>
-            ))}
-          </div>
+      <div className="hero min-h-screen bg-slate-800">
+        <div className="max-w-5xl mx-auto">
+          <form className="flex items-center">
+            <input
+              type="text"
+              placeholder="title"
+              className="m-4 text-slate-50 bg-transparent border border-slate-700 focus:ring-slate-400 focus:outline-none p-4 rounded-lg"
+            />
+            <input
+              type="text"
+              placeholder="description"
+              className="m-4 text-slate-50 bg-transparent border border-slate-700 focus:ring-slate-400 focus:outline-none p-4 rounded-lg"
+            />
+            <button
+              type="submit"
+              className="m-4 border border-purple-500 p-3 rounded-lg transition-opacity bg-purple-600 bg-opacity-30 hover:bg-opacity-50 text-slate-50"
+            >
+              Add new project
+            </button>
+          </form>
+          <table className="table w-full text-slate-50">
+            <thead>
+              <tr>
+                <th className="bg-slate-900 border border-slate-700 text-slate-50 uppercase">Title</th>
+                <th className="bg-slate-900 border border-slate-700 text-slate-50 uppercase">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {projects.map((project) => (
+                <tr key={project.id} className="bg-transparent">
+                  <td className="border border-slate-700">{project.title}</td>
+                  <td className="border border-slate-700">{project.desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </>
