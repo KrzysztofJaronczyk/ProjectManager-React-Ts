@@ -11,7 +11,7 @@ export type Project = {
   id: string;
   title: string;
   desc: string;
-  created: Date | null; // Change created type to Date | null
+  created: Date | null;
 };
 
 export enum InputEnum {

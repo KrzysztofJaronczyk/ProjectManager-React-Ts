@@ -1,10 +1,10 @@
-import { Dialog } from '@headlessui/react';
-import { lazy, Suspense, useState } from 'react';
-import { Outlet, RouteObject, useRoutes, BrowserRouter } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Outlet, RouteObject, BrowserRouter, useRoutes } from 'react-router-dom';
 
 const Loading = () => <p className="p-4 w-full h-full text-center">Loading...</p>;
 
 const IndexScreen = lazy(() => import('~/components/screens/Index'));
+const ProjectDetailsScreen = lazy(() => import('~/components/screens/ProjectDetails'));
 const Page404Screen = lazy(() => import('~/components/screens/404'));
 
 function Layout() {
@@ -12,7 +12,7 @@ function Layout() {
     <div>
       <nav className="p-4 flex text-white items-center justify-between bg-slate-800">
         <a href="/" className="text-3xl">
-          Project <span className="text-purple-500">Manager</span>{' '}
+          Project <span className="text-purple-500">Manager</span>
         </a>
       </nav>
       <Outlet />
@@ -37,6 +37,10 @@ const InnerRouter = () => {
         {
           index: true,
           element: <IndexScreen />,
+        },
+        {
+          path: 'project/:projectId',
+          element: <ProjectDetailsScreen />,
         },
         {
           path: '*',
