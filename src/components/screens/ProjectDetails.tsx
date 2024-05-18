@@ -8,13 +8,7 @@ import Modal from '../shared/Modal';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { QuestionMarkCircleIcon, ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-
-// const mockTasks: Task[] = [
-//   { id: '1', title: 'Task 1', description: 'Description 1', priority: 'high', state: 'todo', createdAt: new Date() },
-//   { id: '2', title: 'Task 2', description: 'Description 2', priority: 'medium', state: 'doing', createdAt: new Date() },
-//   { id: '3', title: 'Task 3', description: 'Description 3', priority: 'low', state: 'done', createdAt: new Date() },
-// ];
-
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 export default function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
   const firestore = useFirestore();
@@ -49,7 +43,7 @@ export default function ProjectDetails() {
     }
   };
 
-  const updateTask = async (id: string, updatedData: Partial<Task>) => {
+  const updateTask = async (id: string, updatedData: Partial<Omit<Task, 'id'>>) => {
     try {
       const docRef = doc(firestore, 'tasks', id);
       await updateDoc(docRef, updatedData);
@@ -59,6 +53,7 @@ export default function ProjectDetails() {
       console.error('Error updating task: ', error);
     }
   };
+  
 
   const deleteTask = async (id: string) => {
     try {
@@ -74,6 +69,31 @@ export default function ProjectDetails() {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  const onDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+  
+    const { source, destination } = result;
+  
+    if (source.droppableId === destination.droppableId) {
+      // Reorder within the same column
+      const updatedTasks = Array.from(tasks);
+      const [removed] = updatedTasks.splice(source.index, 1);
+      updatedTasks.splice(destination.index, 0, removed);
+      setTasks(updatedTasks);
+    } else {
+      // Move to a different column
+      const sourceTask = tasks.find((task) => task.id === result.draggableId);
+      if (sourceTask) {
+        const updatedTask = { ...sourceTask, state: destination.droppableId as 'todo' | 'doing' | 'done' };
+        updateTask(result.draggableId, updatedTask);
+      }
+      const updatedTasks = tasks.filter((task) => task.id !== result.draggableId);
+      setTasks(updatedTasks);
+    }
+  };
+  
+  
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -87,38 +107,73 @@ export default function ProjectDetails() {
         <ProjectForm onSubmit={addTask} />
       </Modal>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
-            <QuestionMarkCircleIcon className="w-8 h-8 mr-2 text-green-500" /> Todo
-          </h2>
-          {tasks
-            .filter((task) => task.state === 'todo')
-            .map((task) => (
-              <TaskCard key={task.id} task={task} onUpdate={updateTask} onDelete={deleteTask} />
-            ))}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="grid grid-cols-3 gap-4">
+          <Droppable droppableId="todo">
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
+                  <QuestionMarkCircleIcon className="w-8 h-8 mr-2 text-green-500" /> Todo
+                </h2>
+                {tasks
+                  .filter((task) => task.state === 'todo')
+                  .map((task, index) => (
+                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                      {(provided) => (
+                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                          <TaskCard task={task} onUpdate={updateTask} onDelete={deleteTask} />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+          <Droppable droppableId="doing">
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
+                  <ExclamationCircleIcon className="w-8 h-8 mr-2 text-yellow-500" /> In Progress
+                </h2>
+                {tasks
+                  .filter((task) => task.state === 'doing')
+                  .map((task, index) => (
+                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                      {(provided) => (
+                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                          <TaskCard task={task} onUpdate={updateTask} onDelete={deleteTask} />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+          <Droppable droppableId="done">
+            {(provided) => (
+              <div {...provided.droppableProps} ref={provided.innerRef}>
+                <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
+                  <CheckCircleIcon className="w-8 h-8 mr-2 text-purple-500" /> Done
+                </h2>
+                {tasks
+                  .filter((task) => task.state === 'done')
+                  .map((task, index) => (
+                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                      {(provided) => (
+                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                          <TaskCard task={task} onUpdate={updateTask} onDelete={deleteTask} />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
         </div>
-        <div>
-          <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
-            <ExclamationCircleIcon className="w-8 h-8 mr-2 text-yellow-500" /> In Progress
-          </h2>
-          {tasks
-            .filter((task) => task.state === 'doing')
-            .map((task) => (
-              <TaskCard key={task.id} task={task} onUpdate={updateTask} onDelete={deleteTask} />
-            ))}
-        </div>
-        <div>
-          <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
-            <CheckCircleIcon className="w-8 h-8 mr-2 text-purple-500" /> Done
-          </h2>{' '}
-          {tasks
-            .filter((task) => task.state === 'done')
-            .map((task) => (
-              <TaskCard key={task.id} task={task} onUpdate={updateTask} onDelete={deleteTask} />
-            ))}
-        </div>
-      </div>
+      </DragDropContext>
 
       <ToastContainer />
     </div>
