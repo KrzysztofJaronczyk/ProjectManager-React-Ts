@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Task from './Task';
+import Task from '../shared/Task';
 
 interface NewTaskFormProps {
   onSubmit: (newTask: Partial<Task>) => void;

@@ -15,7 +15,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     onClose();
   };
 
-  return ReactDOM.createPortal(
+  return(
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-4 rounded-md w-3/4 relative">
         <button
@@ -26,8 +26,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
         </button>
         {children}
       </div>
-    </div>,
-    document.getElementById('root') as HTMLElement,
+    </div>
   );
 };
 
