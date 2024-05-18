@@ -1,29 +1,72 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { collection, getDocs, query, addDoc, doc, updateDoc, deleteDoc, where } from 'firebase/firestore';
+import { useFirestore } from '~/lib/firebase';
 import Task from '../shared/Task'; 
 import ProjectForm from '../shared/ProjectForm';
+import { Bounce, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const mockTasks: Task[] = [
-  { id: '1', title: 'Task 1', description: 'Description 1', priority: 'high', state: 'todo', createdAt: new Date() },
-  { id: '2', title: 'Task 2', description: 'Description 2', priority: 'medium', state: 'doing', createdAt: new Date() },
-  { id: '3', title: 'Task 3', description: 'Description 3', priority: 'low', state: 'done', createdAt: new Date() },
-];
+
+// const mockTasks: Task[] = [
+//   { id: '1', title: 'Task 1', description: 'Description 1', priority: 'high', state: 'todo', createdAt: new Date() },
+//   { id: '2', title: 'Task 2', description: 'Description 2', priority: 'medium', state: 'doing', createdAt: new Date() },
+//   { id: '3', title: 'Task 3', description: 'Description 3', priority: 'low', state: 'done', createdAt: new Date() },
+// ];
 
 export default function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const firestore = useFirestore();
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  const addTask = (newTask: Partial<Task>) => {
-    const taskWithId = { ...newTask, id: Date.now().toString(), state: 'todo', createdAt: new Date() } as Task;
-    setTasks([...tasks, taskWithId]);
+  useEffect(() => {
+    async function fetchTasks() {
+      const tasksCollection = collection(firestore, 'tasks');
+      const tasksQuery = query(tasksCollection, where('projectId', '==', projectId));
+      const querySnapshot = await getDocs(tasksQuery);
+      const fetchedTasks: Task[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        fetchedTasks.push({ id: doc.id, ...data, createdAt: data.createdAt.toDate() } as Task);
+      });
+      setTasks(fetchedTasks);
+    }
+
+    fetchTasks();
+  }, [firestore, projectId]);
+
+  const addTask = async (newTask: Partial<Task>) => {
+    try {
+      const tasksCollection = collection(firestore, 'tasks');
+      const taskWithId = { ...newTask, projectId, state: 'todo', createdAt: new Date() } as Task;
+      const docRef = await addDoc(tasksCollection, taskWithId);
+      setTasks([...tasks, { ...taskWithId, id: docRef.id }]);
+      toast.success('Task added!', { transition: Bounce });
+    } catch (error) {
+      console.error('Error adding task: ', error);
+    }
   };
 
-  const updateTask = (id: string, updatedData: Partial<Task>) => {
-    setTasks(tasks.map(task => (task.id === id ? { ...task, ...updatedData } : task)));
+  const updateTask = async (id: string, updatedData: Partial<Task>) => {
+    try {
+      const docRef = doc(firestore, 'tasks', id);
+      await updateDoc(docRef, updatedData);
+      setTasks(tasks.map(task => (task.id === id ? { ...task, ...updatedData } : task)));
+      toast.success('Task updated!', { transition: Bounce });
+    } catch (error) {
+      console.error('Error updating task: ', error);
+    }
   };
 
-  const deleteTask = (id: string) => {
-    setTasks(tasks.filter(task => task.id !== id));
+  const deleteTask = async (id: string) => {
+    try {
+      const docRef = doc(firestore, 'tasks', id);
+      await deleteDoc(docRef);
+      setTasks(tasks.filter(task => task.id !== id));
+      toast.success('Task deleted!', { transition: Bounce });
+    } catch (error) {
+      console.error('Error deleting task: ', error);
+    }
   };
 
   return (
@@ -53,6 +96,7 @@ export default function ProjectDetails() {
           ))}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }
