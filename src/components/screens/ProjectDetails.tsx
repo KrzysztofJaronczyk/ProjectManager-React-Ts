@@ -100,7 +100,7 @@ export default function ProjectDetails() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Project Details - {projectId}</h1>
         <button onClick={openModal} className="bg-green-500 text-white py-2 px-4 rounded-md">
-          Add Task
+          Add Functionality
         </button>
       </div>
 
@@ -109,7 +109,7 @@ export default function ProjectDetails() {
       </Modal>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4 ">
           <Droppable droppableId="todo">
             {(provided) => (
               <div {...provided.droppableProps} ref={provided.innerRef}>
@@ -121,7 +121,7 @@ export default function ProjectDetails() {
                   .map((task, index) => (
                     <Draggable key={task.id} draggableId={task.id} index={index}>
                       {(provided) => (
-                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef} className='my-2'>
                           <TaskCard task={task} onUpdate={updateTask} onDelete={deleteTask} />
                         </div>
                       )}
@@ -142,7 +142,7 @@ export default function ProjectDetails() {
                   .map((task, index) => (
                     <Draggable key={task.id} draggableId={task.id} index={index}>
                       {(provided) => (
-                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef} className='my-2'>
                           <TaskCard task={task} onUpdate={updateTask} onDelete={deleteTask} />
                         </div>
                       )}
@@ -163,7 +163,7 @@ export default function ProjectDetails() {
                   .map((task, index) => (
                     <Draggable key={task.id} draggableId={task.id} index={index}>
                       {(provided) => (
-                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef} className='my-2'>
                           <TaskCard task={task} onUpdate={updateTask} onDelete={deleteTask} />
                         </div>
                       )}
