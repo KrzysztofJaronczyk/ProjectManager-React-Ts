@@ -1,4 +1,4 @@
-interface Task {
+interface Functionality {
     id: string;
     title: string;
     description: string;
@@ -7,5 +7,5 @@ interface Task {
     createdAt?: Date;
   }
   
-  export default Task;
+  export default Functionality;
   

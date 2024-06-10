@@ -2,68 +2,67 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { collection, getDocs, query, addDoc, doc, updateDoc, deleteDoc, where } from 'firebase/firestore';
 import { useFirestore } from '~/lib/firebase';
-import Task from '../shared/Task';
+import Functionality from '../shared/Functionality';
 import ProjectForm from '../shared/ProjectForm';
 import Modal from '../shared/Modal';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { QuestionMarkCircleIcon, ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import TaskCard from '../shared/TaskCard';
+import FunctionalityCard from '../shared/FunctionalityCard';
 export default function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
   const firestore = useFirestore();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [functionalities, setfunctionalities] = useState<Functionality[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    async function fetchTasks() {
-      const tasksCollection = collection(firestore, 'tasks');
-      const tasksQuery = query(tasksCollection, where('projectId', '==', projectId));
-      const querySnapshot = await getDocs(tasksQuery);
-      const fetchedTasks: Task[] = [];
+    async function fetchfunctionalities() {
+      const functionalitiesCollection = collection(firestore, 'functionalities');
+      const functionalitiesQuery = query(functionalitiesCollection, where('projectId', '==', projectId));
+      const querySnapshot = await getDocs(functionalitiesQuery);
+      const fetchedfunctionalities: Functionality[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        fetchedTasks.push({ id: doc.id, ...data, createdAt: data.createdAt.toDate() } as Task);
+        fetchedfunctionalities.push({ id: doc.id, ...data, createdAt: data.createdAt.toDate() } as Functionality);
       });
-      setTasks(fetchedTasks);
+      setfunctionalities(fetchedfunctionalities);
     }
 
-    fetchTasks();
+    fetchfunctionalities();
   }, [firestore, projectId]);
 
-  const addTask = async (newTask: Partial<Task>) => {
+  const addFunctionality = async (newFunctionality: Partial<Functionality>) => {
     try {
-      const tasksCollection = collection(firestore, 'tasks');
-      const taskWithId = { ...newTask, projectId, state: 'todo', createdAt: new Date() } as Task;
-      const docRef = await addDoc(tasksCollection, taskWithId);
-      setTasks([...tasks, { ...taskWithId, id: docRef.id }]);
-      toast.success('Task added!', { transition: Bounce });
+      const functionalitiesCollection = collection(firestore, 'functionalities');
+      const functionalityWithId = { ...newFunctionality, projectId, state: 'todo', createdAt: new Date() } as Functionality;
+      const docRef = await addDoc(functionalitiesCollection, functionalityWithId);
+      setfunctionalities([...functionalities, { ...functionalityWithId, id: docRef.id }]);
+      toast.success('Functionality added!', { transition: Bounce });
     } catch (error) {
-      console.error('Error adding task: ', error);
+      console.error('Error adding functionality: ', error);
     }
   };
 
-  const updateTask = async (id: string, updatedData: Partial<Omit<Task, 'id'>>) => {
+  const updateFunctionality = async (id: string, updatedData: Partial<Omit<Functionality, 'id'>>) => {
     try {
-      const docRef = doc(firestore, 'tasks', id);
+      const docRef = doc(firestore, 'functionalities', id);
       await updateDoc(docRef, updatedData);
-      setTasks(tasks.map((task) => (task.id === id ? { ...task, ...updatedData } : task)));
-      toast.success('Task updated!', { transition: Bounce });
+      setfunctionalities(functionalities.map((functionality) => (functionality.id === id ? { ...functionality, ...updatedData } : functionality)));
+      toast.success('Functionality updated!', { transition: Bounce });
     } catch (error) {
-      console.error('Error updating task: ', error);
+      console.error('Error updating functionality: ', error);
     }
   };
-  
 
-  const deleteTask = async (id: string) => {
+  const deleteFunctionality = async (id: string) => {
     try {
-      const docRef = doc(firestore, 'tasks', id);
+      const docRef = doc(firestore, 'functionalities', id);
       await deleteDoc(docRef);
-      setTasks(tasks.filter((task) => task.id !== id));
-      toast.success('Task deleted!', { transition: Bounce });
+      setfunctionalities(functionalities.filter((functionality) => functionality.id !== id));
+      toast.success('Functionality deleted!', { transition: Bounce });
     } catch (error) {
-      console.error('Error deleting task: ', error);
+      console.error('Error deleting functionality: ', error);
     }
   };
 
@@ -72,28 +71,26 @@ export default function ProjectDetails() {
 
   const onDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
-  
+
     const { source, destination } = result;
-  
+
     if (source.droppableId === destination.droppableId) {
       // Reorder within the same column
-      const updatedTasks = Array.from(tasks);
-      const [removed] = updatedTasks.splice(source.index, 1);
-      updatedTasks.splice(destination.index, 0, removed);
-      setTasks(updatedTasks);
+      const updatedfunctionalities = Array.from(functionalities);
+      const [removed] = updatedfunctionalities.splice(source.index, 1);
+      updatedfunctionalities.splice(destination.index, 0, removed);
+      setfunctionalities(updatedfunctionalities);
     } else {
       // Move to a different column
-      const sourceTask = tasks.find((task) => task.id === result.draggableId);
-      if (sourceTask) {
-        const updatedTask = { ...sourceTask, state: destination.droppableId as 'todo' | 'doing' | 'done' };
-        updateTask(result.draggableId, updatedTask);
+      const sourceFunctionality = functionalities.find((functionality) => functionality.id === result.draggableId);
+      if (sourceFunctionality) {
+        const updatedFunctionality = { ...sourceFunctionality, state: destination.droppableId as 'todo' | 'doing' | 'done' };
+        updateFunctionality(result.draggableId, updatedFunctionality);
       }
-      const updatedTasks = tasks.filter((task) => task.id !== result.draggableId);
-      setTasks(updatedTasks);
+      const updatedfunctionalities = functionalities.filter((functionality) => functionality.id !== result.draggableId);
+      setfunctionalities(updatedfunctionalities);
     }
   };
-  
-  
 
   return (
     <div className="p-4">
@@ -105,7 +102,7 @@ export default function ProjectDetails() {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={closeModal}>
-        <ProjectForm onSubmit={addTask} />
+        <ProjectForm onSubmit={addFunctionality} />
       </Modal>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -116,13 +113,18 @@ export default function ProjectDetails() {
                 <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
                   <QuestionMarkCircleIcon className="w-8 h-8 mr-2 text-green-500" /> Todo
                 </h2>
-                {tasks
-                  .filter((task) => task.state === 'todo')
-                  .map((task, index) => (
-                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                {functionalities
+                  .filter((functionality) => functionality.state === 'todo')
+                  .map((functionality, index) => (
+                    <Draggable key={functionality.id} draggableId={functionality.id} index={index}>
                       {(provided) => (
-                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef} className='my-2'>
-                          <TaskCard task={task} onUpdate={updateTask} onDelete={deleteTask} />
+                        <div
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
+                          className="my-2"
+                        >
+                          <FunctionalityCard functionality={functionality} onUpdate={updateFunctionality} onDelete={deleteFunctionality} />
                         </div>
                       )}
                     </Draggable>
@@ -137,13 +139,18 @@ export default function ProjectDetails() {
                 <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
                   <ExclamationCircleIcon className="w-8 h-8 mr-2 text-yellow-500" /> In Progress
                 </h2>
-                {tasks
-                  .filter((task) => task.state === 'doing')
-                  .map((task, index) => (
-                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                {functionalities
+                  .filter((functionality) => functionality.state === 'doing')
+                  .map((functionality, index) => (
+                    <Draggable key={functionality.id} draggableId={functionality.id} index={index}>
                       {(provided) => (
-                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef} className='my-2'>
-                          <TaskCard task={task} onUpdate={updateTask} onDelete={deleteTask} />
+                        <div
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
+                          className="my-2"
+                        >
+                          <FunctionalityCard functionality={functionality} onUpdate={updateFunctionality} onDelete={deleteFunctionality} />
                         </div>
                       )}
                     </Draggable>
@@ -158,13 +165,18 @@ export default function ProjectDetails() {
                 <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
                   <CheckCircleIcon className="w-8 h-8 mr-2 text-purple-500" /> Done
                 </h2>
-                {tasks
-                  .filter((task) => task.state === 'done')
-                  .map((task, index) => (
-                    <Draggable key={task.id} draggableId={task.id} index={index}>
+                {functionalities
+                  .filter((functionality) => functionality.state === 'done')
+                  .map((functionality, index) => (
+                    <Draggable key={functionality.id} draggableId={functionality.id} index={index}>
                       {(provided) => (
-                        <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef} className='my-2'>
-                          <TaskCard task={task} onUpdate={updateTask} onDelete={deleteTask} />
+                        <div
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
+                          className="my-2"
+                        >
+                          <FunctionalityCard functionality={functionality} onUpdate={updateFunctionality} onDelete={deleteFunctionality} />
                         </div>
                       )}
                     </Draggable>
