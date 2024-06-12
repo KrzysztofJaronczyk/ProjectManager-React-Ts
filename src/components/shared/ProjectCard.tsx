@@ -1,4 +1,3 @@
-// ProjectCard.tsx
 import { Project, InputEnum } from '../screens/Index';
 import {
   PencilSquareIcon,

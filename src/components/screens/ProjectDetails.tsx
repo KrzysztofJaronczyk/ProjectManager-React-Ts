@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { collection, getDocs, query, addDoc, doc, updateDoc, deleteDoc, where } from 'firebase/firestore';
 import { useFirestore } from '~/lib/firebase';
 import Functionality from '../shared/Functionality';
-import ProjectForm from '../shared/ProjectForm';
+import NewFunctionalityForm from '../shared/NewFunctionalityForm';
 import Modal from '../shared/Modal';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -35,7 +35,12 @@ export default function ProjectDetails() {
   const addFunctionality = async (newFunctionality: Partial<Functionality>) => {
     try {
       const functionalitiesCollection = collection(firestore, 'functionalities');
-      const functionalityWithId = { ...newFunctionality, projectId, state: 'todo', createdAt: new Date() } as Functionality;
+      const functionalityWithId = {
+        ...newFunctionality,
+        projectId,
+        state: 'todo',
+        createdAt: new Date(),
+      } as Functionality;
       const docRef = await addDoc(functionalitiesCollection, functionalityWithId);
       setfunctionalities([...functionalities, { ...functionalityWithId, id: docRef.id }]);
       toast.success('Functionality added!', { transition: Bounce });
@@ -48,7 +53,11 @@ export default function ProjectDetails() {
     try {
       const docRef = doc(firestore, 'functionalities', id);
       await updateDoc(docRef, updatedData);
-      setfunctionalities(functionalities.map((functionality) => (functionality.id === id ? { ...functionality, ...updatedData } : functionality)));
+      setfunctionalities(
+        functionalities.map((functionality) =>
+          functionality.id === id ? { ...functionality, ...updatedData } : functionality,
+        ),
+      );
       toast.success('Functionality updated!', { transition: Bounce });
     } catch (error) {
       console.error('Error updating functionality: ', error);
@@ -84,7 +93,10 @@ export default function ProjectDetails() {
       // Move to a different column
       const sourceFunctionality = functionalities.find((functionality) => functionality.id === result.draggableId);
       if (sourceFunctionality) {
-        const updatedFunctionality = { ...sourceFunctionality, state: destination.droppableId as 'todo' | 'doing' | 'done' };
+        const updatedFunctionality = {
+          ...sourceFunctionality,
+          state: destination.droppableId as 'todo' | 'doing' | 'done',
+        };
         updateFunctionality(result.draggableId, updatedFunctionality);
       }
       const updatedfunctionalities = functionalities.filter((functionality) => functionality.id !== result.draggableId);
@@ -102,7 +114,7 @@ export default function ProjectDetails() {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={closeModal}>
-        <ProjectForm onSubmit={addFunctionality} />
+        <NewFunctionalityForm onSubmit={addFunctionality} />
       </Modal>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -124,7 +136,11 @@ export default function ProjectDetails() {
                           ref={provided.innerRef}
                           className="my-2"
                         >
-                          <FunctionalityCard functionality={functionality} onUpdate={updateFunctionality} onDelete={deleteFunctionality} />
+                          <FunctionalityCard
+                            functionality={functionality}
+                            onUpdate={updateFunctionality}
+                            onDelete={deleteFunctionality}
+                          />
                         </div>
                       )}
                     </Draggable>
@@ -150,7 +166,11 @@ export default function ProjectDetails() {
                           ref={provided.innerRef}
                           className="my-2"
                         >
-                          <FunctionalityCard functionality={functionality} onUpdate={updateFunctionality} onDelete={deleteFunctionality} />
+                          <FunctionalityCard
+                            functionality={functionality}
+                            onUpdate={updateFunctionality}
+                            onDelete={deleteFunctionality}
+                          />
                         </div>
                       )}
                     </Draggable>
@@ -176,7 +196,11 @@ export default function ProjectDetails() {
                           ref={provided.innerRef}
                           className="my-2"
                         >
-                          <FunctionalityCard functionality={functionality} onUpdate={updateFunctionality} onDelete={deleteFunctionality} />
+                          <FunctionalityCard
+                            functionality={functionality}
+                            onUpdate={updateFunctionality}
+                            onDelete={deleteFunctionality}
+                          />
                         </div>
                       )}
                     </Draggable>

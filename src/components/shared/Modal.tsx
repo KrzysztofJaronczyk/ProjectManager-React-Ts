@@ -14,7 +14,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
     onClose();
   };
 
-  return(
+  return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-4 rounded-md w-3/4 relative">
         <button
@@ -23,7 +23,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
         >
           <XMarkIcon className="w-4 h-4" />
         </button>
-        {children}
+        <div className="bg-red-900">{children}</div>
       </div>
     </div>
   );

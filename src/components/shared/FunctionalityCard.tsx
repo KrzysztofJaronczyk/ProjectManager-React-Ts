@@ -1,8 +1,10 @@
-import { useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useFirestore } from '~/lib/firebase';
 import Functionality from './Functionality';
-import ModalContext from '../contexts/ModalContext';
-import ProjectForm from './ProjectForm';
 import Modal from './Modal';
+import NewTaskForm from './NewTaskForm';
+import Task from './Task';
 
 interface FunctionalityCardProps {
   functionality: Functionality;
@@ -11,8 +13,26 @@ interface FunctionalityCardProps {
 }
 
 const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, onUpdate, onDelete }) => {
+  const firestore = useFirestore();
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [functionalityData, setFunctionalityData] = useState<Partial<Functionality>>(functionality);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState<boolean>(false);
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const tasksCollection = collection(firestore, 'tasks');
+      const q = query(tasksCollection, where('functionalityId', '==', functionality.id));
+      const querySnapshot = await getDocs(q);
+      const tasksList: Task[] = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Task[];
+      setTasks(tasksList);
+    };
+
+    fetchTasks();
+  }, [firestore, functionality.id]);
 
   const handleEditToggle = () => setIsEdit(!isEdit);
 
@@ -29,7 +49,13 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
     onDelete(functionality.id);
   };
 
-  const { isOpen, onClose, onOpen } = useContext(ModalContext);
+  const openTaskModal = () => setIsTaskModalOpen(true);
+  const closeTaskModal = () => setIsTaskModalOpen(false);
+
+  const addTask = (newTask: Partial<Task>) => {
+    setTasks((prevTasks) => [...prevTasks, newTask as Task]);
+    closeTaskModal();
+  };
 
   return (
     <div className="bg-white p-4 rounded-md shadow-md">
@@ -69,8 +95,23 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
           <h3 className="text-lg font-bold">{functionality.title}</h3>
           <p>{functionality.description}</p>
           <p className="text-sm">Priority: {functionality.priority}</p>
+          <h3 className="text-lg font-bold mt-3">Tasks</h3>
+          <div className="mt-2 space-y-2">
+            {tasks.map((task) => (
+              <div key={task.id} className="bg-gray-100 p-2 rounded-md">
+                <h4 className="font-bold">{task.name}</h4>
+                <p>{task.description}</p>
+                <p className="text-sm">Priority: {task.priority}</p>
+                <p className="text-sm">State: {task.state}</p>
+                <p className="text-sm">Assigned User: {task.assignedUser}</p>
+                {task.startDate && <p className="text-sm">Start Date: {task.startDate.toDateString()}</p>}
+                {task.endDate && <p className="text-sm">End Date: {task.endDate.toDateString()}</p>}
+                <p className="text-sm">Expected Completion Time: {task.expectedCompletionTime}</p>
+              </div>
+            ))}
+          </div>
           <div className="flex justify-end space-x-2 mt-2">
-            <button onClick={onOpen} className="bg-green-500 text-white py-1 px-3 rounded-md">
+            <button onClick={openTaskModal} className="bg-green-500 text-white py-1 px-3 rounded-md">
               Add Task
             </button>
             <button onClick={handleEditToggle} className="bg-blue-500 text-white py-1 px-3 rounded-md">
@@ -80,9 +121,9 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
               Delete
             </button>
           </div>
-          {/* <Modal isOpen={isOpen} onClose={onClose}>
-              <ProjectForm onSubmit={} />
-            </Modal> */}
+          <Modal isOpen={isTaskModalOpen} onClose={closeTaskModal}>
+            <NewTaskForm onSubmit={addTask} functionalityId={functionality.id} />
+          </Modal>
         </>
       )}
     </div>
