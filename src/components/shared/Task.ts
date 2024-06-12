@@ -7,9 +7,9 @@ interface Task {
   expectedCompletionTime: string;
   state: 'todo' | 'doing' | 'done';
   addDate: Date;
-  startDate?: Date;
-  endDate?: Date;
-  assignedUser?: string;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  assignedUser?: string | 'none';
 }
 
 export default Task;

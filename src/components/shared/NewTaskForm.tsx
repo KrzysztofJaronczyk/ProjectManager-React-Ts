@@ -47,14 +47,18 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId, in
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const updatedTask: Partial<Task> = {
+        ...newTask,
+        endDate: newTask.state !== 'done' ? null : new Date(),
+      };
       if (initialData && initialData.id) {
         const taskDoc = doc(firestore, 'tasks', initialData.id);
-        await updateDoc(taskDoc, newTask);
-        onSubmit({ ...newTask, id: initialData.id });
+        await updateDoc(taskDoc, updatedTask);
+        onSubmit({ ...updatedTask, id: initialData.id });
       } else {
         const tasksCollection = collection(firestore, 'tasks');
-        const docRef = await addDoc(tasksCollection, newTask);
-        onSubmit({ ...newTask, id: docRef.id });
+        const docRef = await addDoc(tasksCollection, updatedTask);
+        onSubmit({ ...updatedTask, id: docRef.id });
       }
       setNewTask({
         name: '',

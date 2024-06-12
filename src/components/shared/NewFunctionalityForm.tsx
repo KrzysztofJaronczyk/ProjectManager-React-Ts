@@ -38,9 +38,12 @@ const NewFunctionalityForm: React.FC<NewFunctionalityFormProps> = ({ onSubmit })
           onChange={(e) => setNewFunctionality({ ...newFunctionality, description: e.target.value })}
           className="border rounded-md p-2"
         />
+        <h3 className="text-lg font-bold mb-2">Priority</h3>
         <select
           value={newFunctionality.priority}
-          onChange={(e) => setNewFunctionality({ ...newFunctionality, priority: e.target.value as 'low' | 'medium' | 'high' })}
+          onChange={(e) =>
+            setNewFunctionality({ ...newFunctionality, priority: e.target.value as 'low' | 'medium' | 'high' })
+          }
           className="border rounded-md p-2"
         >
           <option value="low">Low</option>

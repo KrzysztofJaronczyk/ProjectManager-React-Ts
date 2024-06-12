@@ -130,17 +130,20 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
     <div className={`bg-white p-4 rounded-md shadow-md ${getShadowColorClass(functionality.priority)}`}>
       {isEdit ? (
         <>
+          <h3 className="text-lg font-bold">Functionality</h3>
           <input
             type="text"
             value={functionalityData.title}
             onChange={(e) => handleInputChange('title', e.target.value)}
             className="border rounded-md p-2 mb-2 w-full"
           />
+          <h3 className="text-lg font-bold">Description</h3>
           <textarea
             value={functionalityData.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
             className="border rounded-md p-2 mb-2 w-full"
           />
+          <h3 className="text-lg font-bold">Priority</h3>
           <select
             value={functionalityData.priority}
             onChange={(e) => handleInputChange('priority', e.target.value)}
