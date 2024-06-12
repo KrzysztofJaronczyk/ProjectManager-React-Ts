@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useFirestore } from '~/lib/firebase';
 import Functionality from './Functionality';
 import Modal from './Modal';
 import NewTaskForm from './NewTaskForm';
 import Task from './Task';
+import { PencilSquareIcon, TrashIcon, UserPlusIcon, CheckBadgeIcon } from '@heroicons/react/24/outline';
 
 interface FunctionalityCardProps {
   functionality: Functionality;
@@ -18,16 +19,24 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
   const [functionalityData, setFunctionalityData] = useState<Partial<Functionality>>(functionality);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState<boolean>(false);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isTaskEditModalOpen, setIsTaskEditModalOpen] = useState<boolean>(false);
+  const [taskToEdit, setTaskToEdit] = useState<Partial<Task> | null>(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
       const tasksCollection = collection(firestore, 'tasks');
       const q = query(tasksCollection, where('functionalityId', '==', functionality.id));
       const querySnapshot = await getDocs(q);
-      const tasksList: Task[] = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Task[];
+      const tasksList: Task[] = querySnapshot.docs.map((doc) => {
+        const data = doc.data() as Task;
+        return {
+          ...data,
+          id: doc.id,
+          addDate: (data.addDate as any).toDate(),
+          startDate: data.startDate ? (data.startDate as any).toDate() : undefined,
+          endDate: data.endDate ? (data.endDate as any).toDate() : undefined,
+        };
+      });
       setTasks(tasksList);
     };
 
@@ -57,8 +66,68 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
     closeTaskModal();
   };
 
+  const openTaskEditModal = (task: Task) => {
+    setTaskToEdit(task);
+    setIsTaskEditModalOpen(true);
+  };
+  const closeTaskEditModal = () => setIsTaskEditModalOpen(false);
+
+  const updateTask = async (updatedTask: Partial<Task>) => {
+    if (updatedTask.id) {
+      const taskDoc = doc(firestore, 'tasks', updatedTask.id);
+      await updateDoc(taskDoc, updatedTask);
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => (task.id === updatedTask.id ? { ...task, ...updatedTask } : task)),
+      );
+      closeTaskEditModal();
+    }
+  };
+
+  const deleteTask = async (taskId: string) => {
+    const taskDoc = doc(firestore, 'tasks', taskId);
+    await deleteDoc(taskDoc);
+    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  };
+
+  const assignUser = async (task: Task) => {
+    // Add logic to assign a user to the task
+    console.log('Assign user to task:', task);
+  };
+
+  const renderTaskState = (state: 'todo' | 'doing' | 'done') => {
+    switch (state) {
+      case 'todo':
+        return <span className="text-green-500">{state}</span>;
+      case 'doing':
+        return <span className="text-orange-500">{state}</span>;
+      case 'done':
+        return <span className="text-purple-500">{state}</span>;
+      default:
+        return state;
+    }
+  };
+
+  const calculateEndDate = (addDate: Date, days: string) => {
+    const endDate = new Date(addDate);
+    endDate.setDate(endDate.getDate() + parseInt(days, 10));
+    return endDate;
+  };
+
+  function getShadowColorClass(priority: string) {
+    switch (priority) {
+      case 'low':
+        return 'shadow-gray-400';
+      case 'medium':
+        return 'shadow-orange-400';
+      case 'high':
+        return 'shadow-red-400';
+      default:
+        return '';
+    }
+  }
+
   return (
-    <div className="bg-white p-4 rounded-md shadow-md">
+    <div className={`bg-white p-4 rounded-md shadow-md ${getShadowColorClass(functionality.priority)}`}>
       {isEdit ? (
         <>
           <input
@@ -92,21 +161,46 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
         </>
       ) : (
         <>
-          <h3 className="text-lg font-bold">{functionality.title}</h3>
+          <h3 className="text-lg font-bold">Functionality: {functionality.title}</h3>
           <p>{functionality.description}</p>
-          <p className="text-sm">Priority: {functionality.priority}</p>
+          <p className="text-md">Priority: {functionality.priority}</p>
           <h3 className="text-lg font-bold mt-3">Tasks</h3>
           <div className="mt-2 space-y-2">
             {tasks.map((task) => (
-              <div key={task.id} className="bg-gray-100 p-2 rounded-md">
-                <h4 className="font-bold">{task.name}</h4>
-                <p>{task.description}</p>
-                <p className="text-sm">Priority: {task.priority}</p>
-                <p className="text-sm">State: {task.state}</p>
-                <p className="text-sm">Assigned User: {task.assignedUser}</p>
-                {task.startDate && <p className="text-sm">Start Date: {task.startDate.toDateString()}</p>}
-                {task.endDate && <p className="text-sm">End Date: {task.endDate.toDateString()}</p>}
-                <p className="text-sm">Expected Completion Time: {task.expectedCompletionTime}</p>
+              <div key={task.id} className="bg-gray-100 p-2 rounded-md relative group">
+                <div>
+                  <h4 className="font-bold">{task.name}</h4>
+                  <p>{task.description}</p>
+                  <p className="text-sm">Priority: {task.priority}</p>
+                  <p className="text-sm">State: {renderTaskState(task.state)}</p>
+                  <p className="text-sm">Assigned User: {task.assignedUser}</p>
+                  {task.startDate && <p className="text-sm">Start Date: {task.startDate.toDateString()}</p>}
+                  {task.endDate && <p className="text-sm">End Date: {task.endDate.toDateString()}</p>}
+                  <p className="text-sm">
+                    Expected Completion Time: {task.expectedCompletionTime} days
+                    {task.startDate &&
+                      ` - should be done till ${calculateEndDate(task.addDate, task.expectedCompletionTime).toDateString()}`}
+                  </p>
+                </div>
+                <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100">
+                  <button onClick={() => assignUser(task)} className="text-gray-500">
+                    <UserPlusIcon className="w-5 h-5" />
+                  </button>
+                  <button onClick={() => openTaskEditModal(task)} className="text-blue-500">
+                    <PencilSquareIcon className="w-5 h-5" />
+                  </button>
+                  <button onClick={() => deleteTask(task.id)} className="text-red-500">
+                    <TrashIcon className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="absolute bottom-2 right-2 flex space-x-2">
+                  {task.state === 'done' && (
+                    <div className="flex space-x-2 justify-center items-center">
+                      <CheckBadgeIcon className="w-5 h-5 text-purple-500" />
+                      <p className="text-purple-500">Completed</p>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -123,6 +217,11 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
           </div>
           <Modal isOpen={isTaskModalOpen} onClose={closeTaskModal}>
             <NewTaskForm onSubmit={addTask} functionalityId={functionality.id} />
+          </Modal>
+          <Modal isOpen={isTaskEditModalOpen} onClose={closeTaskEditModal}>
+            {taskToEdit && (
+              <NewTaskForm onSubmit={updateTask} functionalityId={functionality.id} initialData={taskToEdit} />
+            )}
           </Modal>
         </>
       )}

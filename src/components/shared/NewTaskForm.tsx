@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
-import { addDoc, collection } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { useFirestore } from '~/lib/firebase';
 import Task from './Task';
+import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 interface NewTaskFormProps {
   onSubmit: (newTask: Partial<Task>) => void;
   functionalityId: string;
+  initialData?: Partial<Task>;
 }
 
-const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId }) => {
+const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId, initialData }) => {
   const firestore = useFirestore();
   const [newTask, setNewTask] = useState<Partial<Task>>({
     name: '',
@@ -19,11 +21,17 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId }) 
     expectedCompletionTime: '',
     state: 'todo',
     addDate: new Date(),
-    assignedUser: 'developer', // Default user
+    assignedUser: 'developer',
   });
 
-  const handleInputChange = (field: keyof Task, value: string | Date) => {
-    setNewTask({ ...newTask, [field]: value });
+  useEffect(() => {
+    if (initialData) {
+      setNewTask(initialData);
+    }
+  }, [initialData]);
+
+  const handleInputChange = (field: keyof Task, value: string | Date | null) => {
+    setNewTask({ ...newTask, [field]: value ?? '' });
   };
 
   const handleStateChange = (value: 'todo' | 'doing' | 'done') => {
@@ -39,9 +47,15 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId }) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const tasksCollection = collection(firestore, 'tasks');
-      const docRef = await addDoc(tasksCollection, newTask);
-      onSubmit({ ...newTask, id: docRef.id });
+      if (initialData && initialData.id) {
+        const taskDoc = doc(firestore, 'tasks', initialData.id);
+        await updateDoc(taskDoc, newTask);
+        onSubmit({ ...newTask, id: initialData.id });
+      } else {
+        const tasksCollection = collection(firestore, 'tasks');
+        const docRef = await addDoc(tasksCollection, newTask);
+        onSubmit({ ...newTask, id: docRef.id });
+      }
       setNewTask({
         name: '',
         description: '',
@@ -111,7 +125,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId }) 
           </select>
         )}
         <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded-md">
-          Add Task
+          {initialData ? 'Update Task' : 'Add Task'}
         </button>
       </div>
     </form>
