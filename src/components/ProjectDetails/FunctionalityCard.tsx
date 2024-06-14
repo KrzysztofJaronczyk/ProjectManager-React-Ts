@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useFirestore } from '~/lib/firebase';
-import Functionality from './Functionality';
-import Modal from './Modal';
-import NewTaskForm from './NewTaskForm';
-import Task from './Task';
+import Functionality from '../Models/Functionality';
+import Modal from '../Forms/Modal';
+import NewTaskForm from '../Forms/NewTaskForm';
+import Task from '../Models/Task';
 import { PencilSquareIcon, TrashIcon, UserPlusIcon, CheckBadgeIcon } from '@heroicons/react/24/outline';
+import { showToast } from '../ToastMessage/ToastMessage';
 
 interface FunctionalityCardProps {
   functionality: Functionality;
@@ -52,18 +53,26 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
   const handleUpdate = () => {
     onUpdate(functionality.id, functionalityData);
     setIsEdit(false);
+    showToast('Functionality updated!', 'success');
   };
 
   const handleDelete = () => {
     onDelete(functionality.id);
+    showToast('Functionality deleted!', 'success');
   };
 
   const openTaskModal = () => setIsTaskModalOpen(true);
   const closeTaskModal = () => setIsTaskModalOpen(false);
 
-  const addTask = (newTask: Partial<Task>) => {
-    setTasks((prevTasks) => [...prevTasks, newTask as Task]);
-    closeTaskModal();
+  const addTask = async (newTask: Partial<Task>) => {
+    try {
+      setTasks((prevTasks) => [...prevTasks, newTask as Task]);
+      closeTaskModal();
+      showToast('Task added!', 'success');
+    } catch (error) {
+      console.error('Error adding task: ', error);
+      showToast('Error adding task!', 'error');
+    }
   };
 
   const openTaskEditModal = (task: Task) => {
@@ -74,24 +83,37 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
 
   const updateTask = async (updatedTask: Partial<Task>) => {
     if (updatedTask.id) {
-      const taskDoc = doc(firestore, 'tasks', updatedTask.id);
-      await updateDoc(taskDoc, updatedTask);
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === updatedTask.id ? { ...task, ...updatedTask } : task)),
-      );
-      closeTaskEditModal();
+      try {
+        const taskDoc = doc(firestore, 'tasks', updatedTask.id);
+        await updateDoc(taskDoc, updatedTask);
+        setTasks((prevTasks) =>
+          prevTasks.map((task) => (task.id === updatedTask.id ? { ...task, ...updatedTask } : task)),
+        );
+        closeTaskEditModal();
+        showToast('Task updated!', 'success');
+      } catch (error) {
+        console.error('Error updating task: ', error);
+        showToast('Error updating task!', 'error');
+      }
     }
   };
 
   const deleteTask = async (taskId: string) => {
-    const taskDoc = doc(firestore, 'tasks', taskId);
-    await deleteDoc(taskDoc);
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+    try {
+      const taskDoc = doc(firestore, 'tasks', taskId);
+      await deleteDoc(taskDoc);
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+      showToast('Task deleted!', 'success');
+    } catch (error) {
+      console.error('Error deleting task: ', error);
+      showToast('Error deleting task!', 'error');
+    }
   };
 
   const assignUser = async (task: Task) => {
-    // Add logic to assign a user to the task
+    // ToDo: Add logic to assign a user to the task
     console.log('Assign user to task:', task);
+    showToast('User assigned to task!', 'info');
   };
 
   const renderTaskState = (state: 'todo' | 'doing' | 'done') => {

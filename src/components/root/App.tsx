@@ -1,16 +1,13 @@
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '~/components/contexts/UserContext';
-import Main from '~/components/root/Main';
-import { ModalContextProvider } from '../contexts/ModalContext';
+import Main from '~/components/Root/Main';
 
 export const App = () => {
   return (
     <HelmetProvider>
-      <ModalContextProvider>
-        <AuthProvider>
-          <Main />
-        </AuthProvider>{' '}
-      </ModalContextProvider>
+      <AuthProvider>
+        <Main />
+      </AuthProvider>{' '}
     </HelmetProvider>
   );
 };

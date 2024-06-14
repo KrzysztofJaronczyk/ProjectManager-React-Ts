@@ -3,11 +3,11 @@ import { Outlet, RouteObject, BrowserRouter, useRoutes } from 'react-router-dom'
 
 const Loading = () => <p className="p-4 w-full h-full text-center">Loading...</p>;
 
-const IndexScreen = lazy(() => import('~/components/screens/Index'));
-const LoginScreen = lazy(() => import('~/components/screens/Login'));
-const RegisterScreen = lazy(() => import('~/components/screens/Register'));
-const ProjectDetailsScreen = lazy(() => import('~/components/screens/ProjectDetails'));
-const Page404Screen = lazy(() => import('~/components/screens/404'));
+const IndexScreen = lazy(() => import('~/components/ProjectsList/Index'));
+const LoginScreen = lazy(() => import('~/components/Auth/Login'));
+const RegisterScreen = lazy(() => import('~/components/Auth/Register'));
+const ProjectDetailsScreen = lazy(() => import('~/components/ProjectDetails/ProjectDetails'));
+const Page404Screen = lazy(() => import('~/components/404'));
 
 function Layout() {
   return (

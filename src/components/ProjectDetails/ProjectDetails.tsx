@@ -2,34 +2,35 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { collection, getDocs, query, addDoc, doc, updateDoc, deleteDoc, where } from 'firebase/firestore';
 import { useFirestore } from '~/lib/firebase';
-import Functionality from '../shared/Functionality';
-import NewFunctionalityForm from '../shared/NewFunctionalityForm';
-import Modal from '../shared/Modal';
-import { Bounce, ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { QuestionMarkCircleIcon, ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import Functionality from '../Models/Functionality';
+import NewFunctionalityForm from '../Forms/NewFunctionalityForm';
+import Modal from '../Forms/Modal';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import FunctionalityCard from '../shared/FunctionalityCard';
+import FunctionalityCard from './FunctionalityCard';
+import { showToast } from '../ToastMessage/ToastMessage';
+import ToastMessage from '../ToastMessage/ToastMessage';
+import { QuestionMarkCircleIcon, ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+
 export default function ProjectDetails() {
   const { projectId } = useParams<{ projectId: string }>();
   const firestore = useFirestore();
-  const [functionalities, setfunctionalities] = useState<Functionality[]>([]);
+  const [functionalities, setFunctionalities] = useState<Functionality[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    async function fetchfunctionalities() {
+    async function fetchFunctionalities() {
       const functionalitiesCollection = collection(firestore, 'functionalities');
       const functionalitiesQuery = query(functionalitiesCollection, where('projectId', '==', projectId));
       const querySnapshot = await getDocs(functionalitiesQuery);
-      const fetchedfunctionalities: Functionality[] = [];
+      const fetchedFunctionalities: Functionality[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        fetchedfunctionalities.push({ id: doc.id, ...data, createdAt: data.createdAt.toDate() } as Functionality);
+        fetchedFunctionalities.push({ id: doc.id, ...data, createdAt: data.createdAt.toDate() } as Functionality);
       });
-      setfunctionalities(fetchedfunctionalities);
+      setFunctionalities(fetchedFunctionalities);
     }
 
-    fetchfunctionalities();
+    fetchFunctionalities();
   }, [firestore, projectId]);
 
   const addFunctionality = async (newFunctionality: Partial<Functionality>) => {
@@ -42,10 +43,11 @@ export default function ProjectDetails() {
         createdAt: new Date(),
       } as Functionality;
       const docRef = await addDoc(functionalitiesCollection, functionalityWithId);
-      setfunctionalities([...functionalities, { ...functionalityWithId, id: docRef.id }]);
-      toast.success('Functionality added!', { transition: Bounce });
+      setFunctionalities([...functionalities, { ...functionalityWithId, id: docRef.id }]);
+      showToast('Functionality added!', 'success');
     } catch (error) {
       console.error('Error adding functionality: ', error);
+      showToast('Error adding functionality!', 'error');
     }
   };
 
@@ -53,14 +55,15 @@ export default function ProjectDetails() {
     try {
       const docRef = doc(firestore, 'functionalities', id);
       await updateDoc(docRef, updatedData);
-      setfunctionalities(
+      setFunctionalities(
         functionalities.map((functionality) =>
           functionality.id === id ? { ...functionality, ...updatedData } : functionality,
         ),
       );
-      toast.success('Functionality updated!', { transition: Bounce });
+      showToast('Functionality updated!', 'success');
     } catch (error) {
       console.error('Error updating functionality: ', error);
+      showToast('Error updating functionality!', 'error');
     }
   };
 
@@ -68,10 +71,11 @@ export default function ProjectDetails() {
     try {
       const docRef = doc(firestore, 'functionalities', id);
       await deleteDoc(docRef);
-      setfunctionalities(functionalities.filter((functionality) => functionality.id !== id));
-      toast.success('Functionality deleted!', { transition: Bounce });
+      setFunctionalities(functionalities.filter((functionality) => functionality.id !== id));
+      showToast('Functionality deleted!', 'success');
     } catch (error) {
       console.error('Error deleting functionality: ', error);
+      showToast('Error deleting functionality!', 'error');
     }
   };
 
@@ -85,10 +89,10 @@ export default function ProjectDetails() {
 
     if (source.droppableId === destination.droppableId) {
       // Reorder within the same column
-      const updatedfunctionalities = Array.from(functionalities);
-      const [removed] = updatedfunctionalities.splice(source.index, 1);
-      updatedfunctionalities.splice(destination.index, 0, removed);
-      setfunctionalities(updatedfunctionalities);
+      const updatedFunctionalities = Array.from(functionalities);
+      const [removed] = updatedFunctionalities.splice(source.index, 1);
+      updatedFunctionalities.splice(destination.index, 0, removed);
+      setFunctionalities(updatedFunctionalities);
     } else {
       // Move to a different column
       const sourceFunctionality = functionalities.find((functionality) => functionality.id === result.draggableId);
@@ -99,8 +103,8 @@ export default function ProjectDetails() {
         };
         updateFunctionality(result.draggableId, updatedFunctionality);
       }
-      const updatedfunctionalities = functionalities.filter((functionality) => functionality.id !== result.draggableId);
-      setfunctionalities(updatedfunctionalities);
+      const updatedFunctionalities = functionalities.filter((functionality) => functionality.id !== result.draggableId);
+      setFunctionalities(updatedFunctionalities);
     }
   };
 
@@ -212,7 +216,7 @@ export default function ProjectDetails() {
         </div>
       </DragDropContext>
 
-      <ToastContainer />
+      <ToastMessage />
     </div>
   );
 }

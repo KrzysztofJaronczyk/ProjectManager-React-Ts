@@ -1,4 +1,4 @@
-import { Router } from "~/components/router/Router";
+import { Router } from "~/components/Router/Router";
 import { setupFirebase } from "~/lib/firebase";
 import { useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";

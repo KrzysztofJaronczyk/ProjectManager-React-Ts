@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { useFirestore } from '~/lib/firebase';
-import Task from './Task';
+import Task from '../Models/Task';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 

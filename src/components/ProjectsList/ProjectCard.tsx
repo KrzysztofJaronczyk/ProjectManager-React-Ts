@@ -1,4 +1,4 @@
-import { Project, InputEnum } from '../screens/Index';
+import { Project, InputEnum } from './Index';
 import {
   PencilSquareIcon,
   CheckIcon,
@@ -8,7 +8,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import clsx from 'clsx';
-import { Link } from 'react-router-dom';
 
 interface ProjectCardProps {
   project: Project;
@@ -20,7 +19,7 @@ const ProjectCard = ({ project, onUpdate, onDelete }: ProjectCardProps) => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [inputData, setInputData] = useState<Partial<Project>>(project);
 
-  const toggleIsEdit = () => setIsEdit(prevIsEdit => !prevIsEdit);
+  const toggleIsEdit = () => setIsEdit((prevIsEdit) => !prevIsEdit);
 
   const onClose = () => {
     setIsEdit(false);
@@ -49,7 +48,7 @@ const ProjectCard = ({ project, onUpdate, onDelete }: ProjectCardProps) => {
     'focus:outline-none',
     'p-4',
     'rounded-lg',
-    'w-full'
+    'w-full',
   );
 
   const showDetails = () => {
@@ -58,13 +57,16 @@ const ProjectCard = ({ project, onUpdate, onDelete }: ProjectCardProps) => {
   };
 
   return (
-    <div key={project.id} className="h-48 group relative rounded-md flex flex-col justify-between shadow-slate-900 shadow-md p-4 bg-gradient-to-r from-slate-800 to-slate-700">
+    <div
+      key={project.id}
+      className="h-48 group relative rounded-md flex flex-col justify-between shadow-slate-900 shadow-md p-4 bg-gradient-to-r from-slate-800 to-slate-700"
+    >
       <div>
         {isEdit ? (
           <input
             className={clsx(inputClasses, 'text-xl mb-2 font-bold', {
               'bg-gray-900': isEdit,
-              'cursor-text': isEdit
+              'cursor-text': isEdit,
             })}
             value={inputData.title}
             onChange={(e) => handleInputChange(InputEnum.Title, e.target.value)}
@@ -76,7 +78,7 @@ const ProjectCard = ({ project, onUpdate, onDelete }: ProjectCardProps) => {
           <input
             className={clsx(inputClasses, {
               'bg-gray-900': isEdit,
-              'cursor-text': isEdit
+              'cursor-text': isEdit,
             })}
             value={inputData.desc}
             onChange={(e) => handleInputChange(InputEnum.Description, e.target.value)}

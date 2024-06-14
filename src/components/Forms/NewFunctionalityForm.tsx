@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Functionality from './Functionality';
+import Functionality from '../Models/Functionality';
 
 interface NewFunctionalityFormProps {
   onSubmit: (newFunctionality: Partial<Functionality>) => void;
