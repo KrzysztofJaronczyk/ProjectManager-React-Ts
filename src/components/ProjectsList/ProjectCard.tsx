@@ -1,4 +1,5 @@
-import { Project, InputEnum } from './Index';
+import Project from '../Models/Project';
+import { InputEnum } from './Index';
 import {
   PencilSquareIcon,
   CheckIcon,
@@ -8,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import clsx from 'clsx';
+import { showToast } from '../ToastMessage/ToastMessage';
 
 interface ProjectCardProps {
   project: Project;
@@ -30,7 +32,19 @@ const ProjectCard = ({ project, onUpdate, onDelete }: ProjectCardProps) => {
     setInputData({ ...inputData, [field]: value });
   };
 
+  const validateProject = (data: Partial<Project>) => {
+    if (!data.title || !data.desc || !data.created) {
+      return 'All fields are required.';
+    }
+    return null;
+  };
+
   const handleUpdate = () => {
+    const error = validateProject(inputData);
+    if (error) {
+      showToast('⚠️ ' + error, 'error');
+      return; // Prevent the update if validation fails
+    }
     setIsEdit(false);
     onUpdate(project.id, inputData);
   };

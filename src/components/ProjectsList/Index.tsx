@@ -6,13 +6,7 @@ import ToastMessage from '../ToastMessage/ToastMessage';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ProjectCard from './ProjectCard';
-
-export type Project = {
-  id: string;
-  title: string;
-  desc: string;
-  created: Date | null;
-};
+import Project from '../Models/Project';
 
 export enum InputEnum {
   Id = 'id',
@@ -29,7 +23,7 @@ function Index() {
     desc: '',
     created: new Date(),
   });
-  const [formError, setFormError] = useState<boolean>(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -40,7 +34,6 @@ function Index() {
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         if (data.created) {
-          // Check if created field exists
           const createdDate = data.created.toDate(); // Parse Firestore Timestamp to Date object
           fetchedData.push({ id: doc.id, ...data, created: createdDate } as Project);
         } else {
@@ -81,8 +74,21 @@ function Index() {
     });
   };
 
+  const validateForm = () => {
+    if (!inputData.title || !inputData.desc || !inputData.created) {
+      return 'All fields are required.';
+    }
+    return null;
+  };
+
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const error = validateForm();
+    if (error) {
+      setFormError(error);
+      showToast('⚠️ ' + error, 'error');
+      return;
+    }
     try {
       const projectsCollection = collection(firestore, 'project');
       const newProject: Partial<Project> = {
@@ -95,8 +101,10 @@ function Index() {
       showToast('🦄 Project has been added!', 'success');
       setProjects([...projects, { id: docRef.id, ...newProject } as Project]);
       setInputData({ title: '', desc: '', created: new Date() });
+      setFormError(null);
     } catch (error) {
-      setFormError(true);
+      setFormError('An error occurred while adding the project.');
+      showToast('⚠️ An error occurred while adding the project.', 'error');
     }
   };
 
@@ -122,7 +130,7 @@ function Index() {
             <DatePicker
               selected={inputData.created as Date}
               onChange={(date) => handleInputChange(InputEnum.Created, date)}
-              dateFormat="dd/MM/yyyy" // Set date format to DD/MM/YYYY
+              dateFormat="dd/MM/yyyy"
               className="m-4 text-slate-50 bg-transparent border border-slate-700 focus:ring-slate-400 focus:outline-none p-4 rounded-lg"
             />
             <button
