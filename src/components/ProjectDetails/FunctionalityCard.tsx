@@ -5,7 +5,13 @@ import Functionality from '../Models/Functionality';
 import Modal from '../Forms/Modal';
 import NewTaskForm from '../Forms/NewTaskForm';
 import Task from '../Models/Task';
-import { PencilSquareIcon, TrashIcon, UserPlusIcon, CheckBadgeIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
+import {
+  PencilSquareIcon,
+  TrashIcon,
+  UserPlusIcon,
+  CheckBadgeIcon,
+  RocketLaunchIcon,
+} from '@heroicons/react/24/outline';
 import { showToast } from '../ToastMessage/ToastMessage';
 
 interface FunctionalityCardProps {
@@ -51,9 +57,19 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
   };
 
   const handleUpdate = () => {
-    onUpdate(functionality.id, functionalityData);
-    setIsEdit(false);
-    showToast('Functionality updated!', 'success');
+    try {
+      if (functionalityData.title != '' && functionalityData.description != '') {
+        onUpdate(functionality.id, functionalityData);
+        setIsEdit(false);
+        showToast('Functionality updated!', 'success');
+      } else {
+        showToast('All fields are required.', 'error');
+        // console.error(functionalityData.title, functionalityData.description)
+      }
+    } catch (error) {
+      console.error('Error updating functionality: ', error);
+      showToast('Error updating functionality!', 'error');
+    }
   };
 
   const handleDelete = () => {
@@ -230,7 +246,8 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
             ))}
           </div>
           <div className="flex justify-end space-x-2 mt-2">
-          <button onClick={openTaskModal} className="bg-green-500 text-white py-1 px-3 rounded-md">
+            {/* add new task */}
+            <button onClick={openTaskModal} className="bg-green-500 text-white py-1 px-3 rounded-md">
               <RocketLaunchIcon className="h-5 w-5" />
             </button>
             <button onClick={handleEditToggle} className="bg-blue-500 text-white py-1 px-3 rounded-md">

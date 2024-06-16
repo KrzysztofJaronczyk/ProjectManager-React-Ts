@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { useFirestore } from '~/lib/firebase';
 import Task from '../Models/Task';
+import { showToast } from '../ToastMessage/ToastMessage';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -23,6 +24,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId, in
     addDate: new Date(),
     assignedUser: 'developer',
   });
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -44,8 +46,25 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId, in
     setNewTask(updatedTask);
   };
 
+  const validateForm = () => {
+    if (!newTask.name || !newTask.description || !newTask.priority || !newTask.expectedCompletionTime || !newTask.state) {
+      return 'All fields are required.';
+    }
+    if (!Number.isInteger(Number(newTask.expectedCompletionTime))) {
+      return 'Expected completion time must be an integer.';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const validationError = validateForm();
+    if (validationError) {
+      setFormError(validationError);
+      showToast(validationError, 'error');
+      return;
+    }
+
     try {
       const updatedTask: Partial<Task> = {
         ...newTask,
@@ -70,8 +89,11 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId, in
         addDate: new Date(),
         assignedUser: 'developer',
       });
+      setFormError(null);
     } catch (error) {
       console.error('Error adding task: ', error);
+      setFormError('An error occurred while adding the task.');
+      showToast('An error occurred while adding the task.', 'error');
     }
   };
 
@@ -108,6 +130,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId, in
           className="border rounded-md p-2"
           placeholder="Expected Completion Time (in days)"
         />
+        {formError && <p className="text-red-500">{formError}</p>}
         <select
           value={newTask.state}
           onChange={(e) => handleStateChange(e.target.value as 'todo' | 'doing' | 'done')}

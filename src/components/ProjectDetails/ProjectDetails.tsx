@@ -5,8 +5,8 @@ import { useFirestore } from '~/lib/firebase';
 import Functionality from '../Models/Functionality';
 import NewFunctionalityForm from '../Forms/NewFunctionalityForm';
 import Modal from '../Forms/Modal';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import FunctionalityCard from './FunctionalityCard';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
+import DragDrop from '../DragDrop/DragDrop';
 import { showToast } from '../ToastMessage/ToastMessage';
 import ToastMessage from '../ToastMessage/ToastMessage';
 import { QuestionMarkCircleIcon, ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
@@ -121,96 +121,24 @@ export default function ProjectDetails() {
 
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-3 gap-4 ">
-          <Droppable droppableId="todo">
-            {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
-                <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
-                  <QuestionMarkCircleIcon className="w-8 h-8 mr-2 text-green-500" /> Todo
-                </h2>
-                {functionalities
-                  .filter((functionality) => functionality.state === 'todo')
-                  .map((functionality, index) => (
-                    <Draggable key={functionality.id} draggableId={functionality.id} index={index}>
-                      {(provided) => (
-                        <div
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          ref={provided.innerRef}
-                          className="my-2"
-                        >
-                          <FunctionalityCard
-                            functionality={functionality}
-                            onUpdate={updateFunctionality}
-                            onDelete={deleteFunctionality}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-          <Droppable droppableId="doing">
-            {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
-                <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
-                  <ExclamationCircleIcon className="w-8 h-8 mr-2 text-yellow-500" /> In Progress
-                </h2>
-                {functionalities
-                  .filter((functionality) => functionality.state === 'doing')
-                  .map((functionality, index) => (
-                    <Draggable key={functionality.id} draggableId={functionality.id} index={index}>
-                      {(provided) => (
-                        <div
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          ref={provided.innerRef}
-                          className="my-2"
-                        >
-                          <FunctionalityCard
-                            functionality={functionality}
-                            onUpdate={updateFunctionality}
-                            onDelete={deleteFunctionality}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-          <Droppable droppableId="done">
-            {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
-                <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
-                  <CheckCircleIcon className="w-8 h-8 mr-2 text-purple-500" /> Done
-                </h2>
-                {functionalities
-                  .filter((functionality) => functionality.state === 'done')
-                  .map((functionality, index) => (
-                    <Draggable key={functionality.id} draggableId={functionality.id} index={index}>
-                      {(provided) => (
-                        <div
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          ref={provided.innerRef}
-                          className="my-2"
-                        >
-                          <FunctionalityCard
-                            functionality={functionality}
-                            onUpdate={updateFunctionality}
-                            onDelete={deleteFunctionality}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
+          <DragDrop
+            functionalities={functionalities.filter((functionality) => functionality.state === 'todo')}
+            updateFunctionality={updateFunctionality}
+            deleteFunctionality={deleteFunctionality}
+            droppableId="todo"
+          />
+          <DragDrop
+            functionalities={functionalities.filter((functionality) => functionality.state === 'doing')}
+            updateFunctionality={updateFunctionality}
+            deleteFunctionality={deleteFunctionality}
+            droppableId="doing"
+          />
+          <DragDrop
+            functionalities={functionalities.filter((functionality) => functionality.state === 'done')}
+            updateFunctionality={updateFunctionality}
+            deleteFunctionality={deleteFunctionality}
+            droppableId="done"
+          />
         </div>
       </DragDropContext>
 

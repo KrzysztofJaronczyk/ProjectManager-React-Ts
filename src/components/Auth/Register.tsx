@@ -1,3 +1,4 @@
+import {SignInButton} from '../domain/auth/SignInButton';
 export default function Register() {
     function RegisterUser(){
         
@@ -10,6 +11,7 @@ export default function Register() {
         <label htmlFor="password">Password</label>
         <input type="password" name="password" id="password" />
         <button type="submit">Register</button>
+        <SignInButton />
       </form>
       </>
     );
