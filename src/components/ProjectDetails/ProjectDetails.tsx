@@ -60,7 +60,6 @@ export default function ProjectDetails() {
           functionality.id === id ? { ...functionality, ...updatedData } : functionality,
         ),
       );
-      showToast('Functionality updated!', 'success');
     } catch (error) {
       console.error('Error updating functionality: ', error);
       showToast('Error updating functionality!', 'error');
@@ -72,7 +71,6 @@ export default function ProjectDetails() {
       const docRef = doc(firestore, 'functionalities', id);
       await deleteDoc(docRef);
       setFunctionalities(functionalities.filter((functionality) => functionality.id !== id));
-      showToast('Functionality deleted!', 'success');
     } catch (error) {
       console.error('Error deleting functionality: ', error);
       showToast('Error deleting functionality!', 'error');
@@ -118,7 +116,7 @@ export default function ProjectDetails() {
       </div>
 
       <Modal isOpen={isModalOpen} onClose={closeModal}>
-        <NewFunctionalityForm onSubmit={addFunctionality} />
+        <NewFunctionalityForm onSubmit={addFunctionality} onClose={closeModal} />
       </Modal>
 
       <DragDropContext onDragEnd={onDragEnd}>

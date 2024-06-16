@@ -5,7 +5,7 @@ import Functionality from '../Models/Functionality';
 import Modal from '../Forms/Modal';
 import NewTaskForm from '../Forms/NewTaskForm';
 import Task from '../Models/Task';
-import { PencilSquareIcon, TrashIcon, UserPlusIcon, CheckBadgeIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon, TrashIcon, UserPlusIcon, CheckBadgeIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
 import { showToast } from '../ToastMessage/ToastMessage';
 
 interface FunctionalityCardProps {
@@ -230,14 +230,14 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
             ))}
           </div>
           <div className="flex justify-end space-x-2 mt-2">
-            <button onClick={openTaskModal} className="bg-green-500 text-white py-1 px-3 rounded-md">
-              Add Task
+          <button onClick={openTaskModal} className="bg-green-500 text-white py-1 px-3 rounded-md">
+              <RocketLaunchIcon className="h-5 w-5" />
             </button>
             <button onClick={handleEditToggle} className="bg-blue-500 text-white py-1 px-3 rounded-md">
-              Edit
+              <PencilSquareIcon className="h-5 w-5" />
             </button>
             <button onClick={handleDelete} className="bg-red-500 text-white py-1 px-3 rounded-md">
-              Delete
+              <TrashIcon className="h-5 w-5" />
             </button>
           </div>
           <Modal isOpen={isTaskModalOpen} onClose={closeTaskModal}>

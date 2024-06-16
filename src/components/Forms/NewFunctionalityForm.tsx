@@ -1,29 +1,52 @@
 import React, { useState } from 'react';
 import Functionality from '../Models/Functionality';
+import { showToast } from '../ToastMessage/ToastMessage';
 
 interface NewFunctionalityFormProps {
   onSubmit: (newFunctionality: Partial<Functionality>) => void;
+  onClose: () => void;
 }
 
-const NewFunctionalityForm: React.FC<NewFunctionalityFormProps> = ({ onSubmit }) => {
+const NewFunctionalityForm: React.FC<NewFunctionalityFormProps> = ({ onSubmit, onClose }) => {
   const [newFunctionality, setNewFunctionality] = useState<Partial<Functionality>>({
     title: '',
     description: '',
     priority: 'low',
   });
 
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const validateForm = () => {
+    if (!newFunctionality.title || !newFunctionality.description) {
+      return 'All fields are required.';
+    }
+
+    return null;
+  };
+
   const addFunctionality = () => {
-    onSubmit(newFunctionality);
+    const error = validateForm();
+    if (error) {
+      setFormError(error);
+      showToast('⚠️ ' + error, 'error');
+      return;
+    }
+    onSubmit({
+      ...newFunctionality,
+    });
     setNewFunctionality({
       title: '',
       description: '',
       priority: 'low',
     });
+    setFormError(null);
+    onClose();
   };
 
   return (
     <div className="bg-gray-100 p-4 rounded-md">
       <h3 className="text-lg font-bold mb-2">New Functionality</h3>
+      {formError && <div className="text-red-500 mb-2">{formError}</div>}
       <div className="flex flex-col space-y-2">
         <input
           type="text"
