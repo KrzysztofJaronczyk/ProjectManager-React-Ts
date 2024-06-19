@@ -1,5 +1,5 @@
 import {createContext, ReactNode, useContext, useReducer} from "react";
-import { User } from "firebase/auth";
+import { getAuth, signOut, User } from "firebase/auth";
 
 type AuthActions = { type: 'SIGN_IN', payload: { user: User } } | {type: 'SIGN_OUT'}
 
@@ -62,12 +62,21 @@ const useSignIn = () => {
 }
 
 const useSignOut = () => {
-  const {dispatch} = useContext(AuthContext)
-  return {
-    signOut: () => {
-      dispatch({type: "SIGN_OUT"})
+  const { dispatch } = useContext(AuthContext);
+
+  const signOutUser = async () => {
+    try {
+      const auth = getAuth();
+      await signOut(auth);
+      dispatch({ type: "SIGN_OUT" });
+    } catch (error) {
+      console.error("Error signing out:", error);
     }
-  }
-}
+  };
+
+  return {
+    signOut: signOutUser,
+  };
+};
 
 export { useAuthState, useSignIn, useSignOut, AuthProvider };

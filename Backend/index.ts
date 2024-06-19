@@ -10,8 +10,8 @@ const tokenSecret = process.env.TOKEN_SECRET as string;
 let refreshToken: string;
 
 const users = [
-  { login: 'user1', password: 'password1' },
-  { login: 'user2', password: 'password2' },
+  { login: 'user1', password: 'password1', email: 'useremail@test.com' },
+  { login: 'user2', password: 'password2', email: 'usertest@test.com' },
 ];
 
 app.use(cors());
