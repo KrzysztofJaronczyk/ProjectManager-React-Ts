@@ -7,6 +7,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ProjectCard from './ProjectCard';
 import Project from '../Models/Project';
+import ThemeSwitcher from '../ThemeSwitcher/ThemeSwitcher';
 
 export enum InputEnum {
   Id = 'id',
@@ -43,7 +44,7 @@ function Index() {
       setProjects(fetchedData);
     }
     fetchData();
-  }, []);
+  }, [firestore]);
 
   const onDeleteProject = async (id: string) => {
     try {
@@ -109,46 +110,50 @@ function Index() {
   };
 
   return (
-    <>
-      <div className="hero min-h-screen bg-slate-800">
-        <div className="max-w-5xl mx-auto">
-          <form className="flex items-center" onSubmit={handleFormSubmit}>
-            <input
-              type="text"
-              onChange={(e) => handleInputChange(InputEnum.Title, e.target.value)}
-              value={inputData.title}
-              placeholder="title"
-              className="m-4 text-slate-50 bg-transparent border border-slate-700 focus:ring-slate-400 focus:outline-none p-4 rounded-lg"
+    <div className="hero min-h-screen bg-base-100">
+      <div className="max-w-5xl mx-auto py-8">
+        <ThemeSwitcher /> {/* ThemeSwitcher component for theme selection */}
+        <form className="flex items-center space-x-4 mb-4" onSubmit={handleFormSubmit}>
+          <input
+            type="text"
+            onChange={(e) => handleInputChange(InputEnum.Title, e.target.value)}
+            value={inputData.title}
+            placeholder="Title"
+            className="input input-bordered w-1/4"
+          />
+          <input
+            type="text"
+            onChange={(e) => handleInputChange(InputEnum.Description, e.target.value)}
+            value={inputData.desc}
+            placeholder="Description"
+            className="input input-bordered w-1/2"
+          />
+          <DatePicker
+            selected={inputData.created as Date}
+            onChange={(date) => handleInputChange(InputEnum.Created, date)}
+            dateFormat="dd/MM/yyyy"
+            className="input input-bordered"
+          />
+          <button
+            type="submit"
+            className="btn btn-primary"
+          >
+            Add Project
+          </button>
+        </form>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onUpdate={onUpdateProject}
+              onDelete={onDeleteProject}
             />
-            <input
-              type="text"
-              onChange={(e) => handleInputChange(InputEnum.Description, e.target.value)}
-              value={inputData.desc}
-              placeholder="description"
-              className="m-4 text-slate-50 bg-transparent border border-slate-700 focus:ring-slate-400 focus:outline-none p-4 rounded-lg"
-            />
-            <DatePicker
-              selected={inputData.created as Date}
-              onChange={(date) => handleInputChange(InputEnum.Created, date)}
-              dateFormat="dd/MM/yyyy"
-              className="m-4 text-slate-50 bg-transparent border border-slate-700 focus:ring-slate-400 focus:outline-none p-4 rounded-lg"
-            />
-            <button
-              type="submit"
-              className="m-4 border border-purple-500 p-3 rounded-lg transition-opacity bg-purple-600 bg-opacity-30 hover:bg-opacity-50 text-slate-50"
-            >
-              Add new project
-            </button>
-          </form>
-          <div className="grid grid-cols-3 gap-4 w-full text-slate-50">
-            {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} onUpdate={onUpdateProject} onDelete={onDeleteProject} />
-            ))}
-          </div>
+          ))}
         </div>
       </div>
       <ToastMessage />
-    </>
+    </div>
   );
 }
 

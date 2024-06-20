@@ -1,4 +1,4 @@
-import Project from '../Models/Project';
+import React, { useState, useEffect } from 'react';
 import { InputEnum } from './Index';
 import {
   PencilSquareIcon,
@@ -7,9 +7,12 @@ import {
   TrashIcon,
   InformationCircleIcon,
 } from '@heroicons/react/24/outline';
-import { useState } from 'react';
-import clsx from 'clsx';
 import { showToast } from '../ToastMessage/ToastMessage';
+import Project from '../Models/Project';
+import clsx from 'clsx';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { useFirestore } from '~/lib/firebase';
+import Functionality from '../Models/Functionality';
 
 interface ProjectCardProps {
   project: Project;
@@ -20,6 +23,22 @@ interface ProjectCardProps {
 const ProjectCard = ({ project, onUpdate, onDelete }: ProjectCardProps) => {
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [inputData, setInputData] = useState<Partial<Project>>(project);
+  const [functionalitiesCount, setFunctionalitiesCount] = useState<number>(0);
+  const firestore = useFirestore();
+
+  useEffect(() => {
+    async function fetchFunctionalities() {
+      const functionalitiesQuery = query(
+        collection(firestore, 'functionalities'),
+        where('projectId', '==', project.id),
+      );
+      const functionalitiesSnapshot = await getDocs(functionalitiesQuery);
+      const functionalitiesData = functionalitiesSnapshot.docs.map((doc) => doc.data() as Functionality);
+      setFunctionalitiesCount(functionalitiesData.length);
+    }
+
+    fetchFunctionalities();
+  }, [firestore, project.id]);
 
   const toggleIsEdit = () => setIsEdit((prevIsEdit) => !prevIsEdit);
 
@@ -53,72 +72,58 @@ const ProjectCard = ({ project, onUpdate, onDelete }: ProjectCardProps) => {
     onDelete(project.id);
   };
 
-  const inputClasses = clsx(
-    'text-slate-50',
-    'bg-transparent',
-    'border',
-    'border-slate-700',
-    'focus:ring-slate-400',
-    'focus:outline-none',
-    'p-4',
-    'rounded-lg',
-    'w-full',
-  );
-
   const showDetails = () => {
-    // Redirect to project details page with project ID
     window.location.href = `/project/${project.id}`;
   };
+  const cardBgColor = 'bg-base-300';
+  const textColor = 'text-base-content';
 
   return (
     <div
       key={project.id}
-      className="h-48 group relative rounded-md flex flex-col justify-between shadow-slate-900 shadow-md p-4 bg-gradient-to-r from-slate-800 to-slate-700"
+      className={clsx(
+        'h-48 group relative rounded-md flex flex-col justify-between shadow-sm p-4',
+        cardBgColor,
+        textColor,
+      )}
     >
       <div>
         {isEdit ? (
           <input
-            className={clsx(inputClasses, 'text-xl mb-2 font-bold', {
-              'bg-gray-900': isEdit,
-              'cursor-text': isEdit,
-            })}
+            className={clsx('text-xl mb-2 font-bold w-full px-2 py-1 rounded-md', cardBgColor, textColor)}
             value={inputData.title}
             onChange={(e) => handleInputChange(InputEnum.Title, e.target.value)}
           />
         ) : (
-          <div className="text-xl mb-2 font-bold">Project: {inputData.title}</div>
+          <div className="text-xl mb-2 font-bold">{inputData.title}</div>
         )}
         {isEdit ? (
-          <input
-            className={clsx(inputClasses, {
-              'bg-gray-900': isEdit,
-              'cursor-text': isEdit,
-            })}
+          <textarea
+            className={clsx('w-full px-2 py-1 rounded-md', cardBgColor, textColor)}
             value={inputData.desc}
             onChange={(e) => handleInputChange(InputEnum.Description, e.target.value)}
+            style={{ resize: 'none' }}
           />
         ) : (
-          <div>{inputData.desc}</div>
+          <div className="overflow-hidden">{inputData.desc}</div>
         )}
+        <div className="mt-2">
+          <span className="font-semibold">Project functionalities: </span>
+          <span>{functionalitiesCount}</span>
+        </div>
+        <div></div>
       </div>
-      <div className="text-slate-200 text-right">{inputData.created?.toLocaleDateString()}</div>
+      <div className="text-xs text-right">{inputData.created?.toLocaleDateString()}</div>
       {isEdit ? (
         <>
-          <CheckIcon onClick={handleUpdate} className="h-6 w-6 text-green-500 absolute top-4 right-12 cursor-pointer" />
-          <XCircleIcon onClick={onClose} className="h-6 w-6 text-red-900 absolute top-4 right-4 cursor-pointer" />
+          <CheckIcon onClick={handleUpdate} className="h-6 w-6 absolute top-4 right-12 cursor-pointer" />
+          <XCircleIcon onClick={onClose} className="h-6 w-6 absolute top-4 right-4 cursor-pointer" />
         </>
       ) : (
-        <button className="btn btn-active btn-ghost hidden group-hover:block absolute top-4 right-4 p-0 h-20">
-          <InformationCircleIcon
-            onClick={showDetails}
-            className="h-6 w-6 top-0 right-0 absolute text-slate-50 cursor-pointer"
-          />
-
-          <PencilSquareIcon
-            onClick={toggleIsEdit}
-            className="h-6 w-6 top-0 right-0 absolute top-10 text-slate-50 cursor-pointer"
-          />
-          <TrashIcon onClick={handleDelete} className="h-6 w-6 text-red-900 absolute top-20 right-0 cursor-pointer" />
+        <button className="hidden group-hover:block absolute top-4 right-4 p-0 h-20">
+          <InformationCircleIcon onClick={showDetails} className="h-6 w-6 absolute top-0 right-0 cursor-pointer" />
+          <PencilSquareIcon onClick={toggleIsEdit} className="h-6 w-6 absolute top-10 right-0 cursor-pointer" />
+          <TrashIcon onClick={handleDelete} className="h-6 w-6 absolute top-20 right-0 cursor-pointer" />
         </button>
       )}
     </div>
