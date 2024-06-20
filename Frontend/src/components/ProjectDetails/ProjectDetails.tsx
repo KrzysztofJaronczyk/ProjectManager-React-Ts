@@ -107,7 +107,7 @@ export default function ProjectDetails() {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 h-screen">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Project Details - {projectId}</h1>
         <button onClick={openModal} className="bg-green-500 text-white py-2 px-4 rounded-md">

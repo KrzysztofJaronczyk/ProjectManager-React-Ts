@@ -95,7 +95,7 @@ const ProjectCard = ({ project, onUpdate, onDelete }: ProjectCardProps) => {
             onChange={(e) => handleInputChange(InputEnum.Title, e.target.value)}
           />
         ) : (
-          <div className="text-xl mb-2 font-bold">{inputData.title}</div>
+          <div className="text-xl mb-2 font-bold">Project: {inputData.title}</div>
         )}
         {isEdit ? (
           <textarea

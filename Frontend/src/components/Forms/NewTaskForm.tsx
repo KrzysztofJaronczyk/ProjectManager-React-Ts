@@ -98,7 +98,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({ onSubmit, functionalityId, in
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-100 p-4 rounded-md">
+    <form onSubmit={handleSubmit} className="bg-base-200 p-4 rounded-md">
       <h3 className="text-lg font-bold mb-2">New Task</h3>
       <div className="flex flex-col space-y-2">
         <input

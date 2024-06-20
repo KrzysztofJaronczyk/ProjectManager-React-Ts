@@ -44,7 +44,7 @@ const NewFunctionalityForm: React.FC<NewFunctionalityFormProps> = ({ onSubmit, o
   };
 
   return (
-    <div className="bg-gray-100 p-4 rounded-md">
+    <div className="bg-base-200 p-4 rounded-md">
       <h3 className="text-lg font-bold mb-2">New Functionality</h3>
       {formError && <div className="text-red-500 mb-2">{formError}</div>}
       <div className="flex flex-col space-y-2">

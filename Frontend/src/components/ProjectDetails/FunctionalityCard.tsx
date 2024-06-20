@@ -165,7 +165,7 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
   }
 
   return (
-    <div className={`bg-white p-4 rounded-md shadow-md ${getShadowColorClass(functionality.priority)}`}>
+    <div className={`p-4 rounded-md shadow-md ${getShadowColorClass(functionality.priority)}`}>
       {isEdit ? (
         <>
           <h3 className="text-lg font-bold">Functionality</h3>
@@ -208,7 +208,7 @@ const FunctionalityCard: React.FC<FunctionalityCardProps> = ({ functionality, on
           <h3 className="text-lg font-bold mt-3">Tasks</h3>
           <div className="mt-2 space-y-2">
             {tasks.map((task) => (
-              <div key={task.id} className="bg-gray-100 p-2 rounded-md relative group">
+              <div key={task.id} className="bg-base-200 p-2 rounded-md relative group">
                 <div>
                   <h4 className="font-bold">{task.name}</h4>
                   <p>{task.description}</p>
