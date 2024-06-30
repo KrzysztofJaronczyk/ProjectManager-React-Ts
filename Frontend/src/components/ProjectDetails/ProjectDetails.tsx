@@ -120,25 +120,40 @@ export default function ProjectDetails() {
       </Modal>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-3 gap-4 ">
-          <DragDrop
-            functionalities={functionalities.filter((functionality) => functionality.state === 'todo')}
-            updateFunctionality={updateFunctionality}
-            deleteFunctionality={deleteFunctionality}
-            droppableId="todo"
-          />
-          <DragDrop
-            functionalities={functionalities.filter((functionality) => functionality.state === 'doing')}
-            updateFunctionality={updateFunctionality}
-            deleteFunctionality={deleteFunctionality}
-            droppableId="doing"
-          />
-          <DragDrop
-            functionalities={functionalities.filter((functionality) => functionality.state === 'done')}
-            updateFunctionality={updateFunctionality}
-            deleteFunctionality={deleteFunctionality}
-            droppableId="done"
-          />
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
+              <QuestionMarkCircleIcon className="w-8 h-8 mr-2 text-green-500" /> Todo
+            </h2>
+            <DragDrop
+              functionalities={functionalities.filter((functionality) => functionality.state === 'todo')}
+              updateFunctionality={updateFunctionality}
+              deleteFunctionality={deleteFunctionality}
+              droppableId="todo"
+            />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
+              <ExclamationCircleIcon className="w-8 h-8 mr-2 text-yellow-500" /> Doing
+            </h2>
+            <DragDrop
+              functionalities={functionalities.filter((functionality) => functionality.state === 'doing')}
+              updateFunctionality={updateFunctionality}
+              deleteFunctionality={deleteFunctionality}
+              droppableId="doing"
+            />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold mb-2 flex items-center justify-center">
+              <CheckCircleIcon className="w-8 h-8 mr-2 text-purple-500" /> Done
+            </h2>
+            <DragDrop
+              functionalities={functionalities.filter((functionality) => functionality.state === 'done')}
+              updateFunctionality={updateFunctionality}
+              deleteFunctionality={deleteFunctionality}
+              droppableId="done"
+            />
+          </div>
         </div>
       </DragDropContext>
 
