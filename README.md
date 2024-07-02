@@ -1,4 +1,4 @@
-# ⚡ Canban project manager Web App
+# ⚡ Canban Project Manager Web App
 
 ![image](https://github.com/KrzysztofJaronczyk/ProjectManager-React-Ts/assets/92089680/ff695e82-22fc-4df6-ac38-5b813c51fa50)
 
